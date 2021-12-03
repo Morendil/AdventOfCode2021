@@ -1,5 +1,3 @@
- {-# LANGUAGE TransformListComp #-}
-
 import Data.List (transpose, maximumBy)
 import Data.Char (digitToInt)
 import Data.Ord (comparing)
