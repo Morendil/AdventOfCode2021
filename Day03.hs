@@ -33,4 +33,3 @@ main = do
   let oxyRating = sieveAll id (0, ratings)
       co2Rating = sieveAll complement (0, ratings)
   print $ oxyRating * co2Rating
-  print [length bits | bits <- head byRank, then group by id using groupWith]
