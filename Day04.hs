@@ -43,6 +43,11 @@ winner boards called = if null winning then Nothing else Just $ score called (he
 
 main = do
     (called, boards) <- parse bingo <$> readFile "day04.txt"
-    let winnerScore = take 1 $ catMaybes $ map (winner boards) (tail $ inits called)
+    let winnerScore = head $ take 1 $ catMaybes $ map (winner boards) (tail $ inits called)
     -- part1
     print winnerScore
+    -- part2
+    let lastCall = last $ takeWhile (\called -> any (not.wins called) boards) (tail $ inits called)
+        nextCall = take (length lastCall + 1) called
+        lastWinner = head $ filter (not.wins lastCall) boards
+    print $ score nextCall lastWinner
