@@ -22,12 +22,6 @@ bingo = do
     boards <- sepBy1 board (string "\n\n")
     return (draws, boards)
 
-parse :: ReadP a -> String ->  a
-parse parser input =
-    case reverse $ readP_to_S parser input of
-        ((result, _):_) -> result
-        _ -> error "No parse"
-
 wins :: Called -> Board -> Bool
 wins called board = winByRow || winByCol
     where full row = all (`elem` called) row
@@ -51,3 +45,9 @@ main = do
         nextCall = take (length lastCall + 1) called
         lastWinner = head $ filter (not.wins lastCall) boards
     print $ score nextCall lastWinner
+
+parse :: ReadP a -> String ->  a
+parse parser input =
+    case reverse $ readP_to_S parser input of
+        ((result, _):_) -> result
+        _ -> error "No parse"
