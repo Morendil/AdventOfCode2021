@@ -17,12 +17,6 @@ ventLine = (,) <$> coord <*> (string " -> " *> coord)
 ventLines :: ReadP [Line]
 ventLines = sepBy1 ventLine (string "\n")
 
-parse :: ReadP a -> String ->  a
-parse parser input =
-    case reverse $ readP_to_S parser input of
-        ((result, _):_) -> result
-        _ -> error "No parse"
-
 range :: (Enum a, Ord a) => (a,a) -> [a]
 range (a,b) | a > b = reverse [b..a]
 range (a,b) | a == b = repeat a
@@ -41,3 +35,9 @@ main = do
     print $ danger for_part1
     let for_part2 = map expand vents
     print $ danger for_part2
+
+parse :: ReadP a -> String ->  a
+parse parser input =
+    case reverse $ readP_to_S parser input of
+        ((result, _):_) -> result
+        _ -> error "No parse"
