@@ -37,6 +37,5 @@ parse line = toPair $ map (words . unpack) $ splitOn (pack " | ") $ pack line
 
 main = do
     entries <- map parse . lines <$> readFile "day08.txt"
-    print $ entries
     print $ part1 entries
     print $ sum $ map solve entries
