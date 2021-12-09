@@ -2,21 +2,25 @@ import Data.Text (splitOn, pack, unpack)
 import Data.List
 import Data.Maybe
 
-type Entry = ([String], [String])
+type Entry = (Pattern, Output)
+type Pattern = [String]
+type Output = [String]
+type Possibles = String
+type Mapping = String
 
 digitSegments = [6,2,5,5,4,5,6,3,7,6] -- map length segments
 segments = ["abcefg","cf","acdeg","acdfg","bcdf","abdfg","abdefg","acf","acbdefg","abcdfg"]
 
-assignSegments :: [String] -> [String]
+assignSegments :: Pattern -> [Possibles]
 assignSegments patterns = map (\freq -> filter (\c -> length (filter (elem c) patterns) == freq) "abcdefg") [8,6,8,7,4,9,7]
 
-candidates :: [String] -> [String]
+candidates :: [Possibles] -> [Mapping]
 candidates = filter (\l -> nub l == l) . sequence . assignSegments
 
-consistent :: [String] -> String -> Bool
+consistent :: Pattern -> Mapping -> Bool
 consistent patterns mapping = sort (map sort $ transform mapping segments) == sort (map sort patterns)
 
-transform :: String -> [String] -> [String]
+transform :: Mapping -> Pattern -> Pattern
 transform mapping = map (map (\c -> mapping !! fromJust (elemIndex c "abcdefg")))
 
 solve :: Entry -> Int
