@@ -2,7 +2,6 @@ import Data.Char
 import Data.Maybe
 import qualified Data.Map as M
 import qualified Data.Set as S
-import GhcPlugins (takeUniqFromSupply)
 
 type Dumbo = M.Map (Int, Int) Int
 
