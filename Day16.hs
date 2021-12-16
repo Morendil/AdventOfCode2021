@@ -13,6 +13,17 @@ versionSum :: Packet -> Int
 versionSum Literal {version=version} = version
 versionSum Operator {version=version, packets=packets} = version + sum (map versionSum packets)
 
+evaluate :: Packet -> Int
+evaluate Literal {value=value} = value
+evaluate Operator {typeId=0, packets=packets} = sum (map evaluate packets)
+evaluate Operator {typeId=1, packets=packets} = product (map evaluate packets)
+evaluate Operator {typeId=2, packets=packets} = minimum (map evaluate packets)
+evaluate Operator {typeId=3, packets=packets} = maximum (map evaluate packets)
+evaluate Operator {typeId=5, packets=[a,b]} = if evaluate a > evaluate b then 1 else 0
+evaluate Operator {typeId=6, packets=[a,b]} = if evaluate a < evaluate b then 1 else 0
+evaluate Operator {typeId=7, packets=[a,b]} = if evaluate a == evaluate b then 1 else 0
+evaluate packet = error $ "Wrong packet:" ++ show packet
+
 toDecimal :: [Int] -> Int
 toDecimal s = sum $ zipWith (\a b -> a * (2 ^ b)) (reverse s) [0..]
 
@@ -22,6 +33,7 @@ fromHex = concatMap (printf "%04b" . digitToInt)
 main = do
     packet <- parse <$> readFile "day16.txt"
     print $ versionSum packet
+    print $ evaluate packet
 
 parse :: String -> Packet
 parse s = let (packet, rest, len) = parseDirect $ fromHex s in packet
