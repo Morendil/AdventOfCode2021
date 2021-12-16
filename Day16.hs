@@ -4,7 +4,6 @@ import Data.Char
 import Data.Maybe
 import Test.Hspec
 import Test.QuickCheck
-import Debug.Trace
 
 data Packet = Literal {version :: Int, value :: Int} | Operator {version :: Int, typeId :: Int, packets :: [Packet]}
     deriving (Eq, Show)
@@ -20,7 +19,7 @@ literalPacket :: ReadP Packet
 literalPacket = do
     version <- bits 3
     string "100"
-    literal <- literalValue
+    (len, literal) <- literalValue
     return Literal {version=version, value=literal}
 
 operatorPacket :: ReadP Packet
@@ -28,7 +27,7 @@ operatorPacket = do
     version <- bits 3
     typeId <- bits 3
     length <- (string "0" *> bits 15) <++ (string "1" *> bits 11)
-    packets <- many1 bITS    
+    packets <- many1 bITS
     return Operator {version=version, typeId=typeId, packets=packets}
 
 bits :: Int -> ReadP Int
@@ -37,9 +36,10 @@ bits n = toDecimal . map digitToInt <$> count n (satisfy isDigit)
 toDecimal :: [Int] -> Int
 toDecimal s = sum $ zipWith (\a b -> a * (2 ^ b)) (reverse s) [0..]
 
-literalValue :: ReadP Int
-literalValue = toDecimal . map digitToInt <$> collect
-    where one = count 4 (satisfy isDigit)
+literalValue :: ReadP (Int, Int)
+literalValue = consume <$> collect
+    where consume s = (5 * (length s `div` 4), toDecimal $ map digitToInt s)
+          one = count 4 (satisfy isDigit)
           collect = stop <++ continue
           stop = string "0" *> one
           continue = do
