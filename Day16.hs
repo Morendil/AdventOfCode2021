@@ -4,7 +4,6 @@ import Data.List.HT
 import Data.List.Split
 import Data.Maybe
 import Test.Hspec
-import Test.QuickCheck
 
 data Packet = Literal {version :: Int, value :: Int} | Operator {version :: Int, typeId :: Int, packets :: [Packet]}
     deriving (Eq, Show)
