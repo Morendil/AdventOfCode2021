@@ -20,6 +20,10 @@ add :: Point -> Point -> Point
 add [x1,y1,z1] [x2,y2,z2] = [x1+x2,y1+y2,z1+z2]
 add _ _ = error "Bad point"
 
+mdist :: Point -> Point -> Int
+mdist [x1,y1,z1] [x2,y2,z2] = abs (x1-x2) + abs (y1-y2) + abs (z1-z2)
+mdist _ _ = error "Bad point"
+
 split :: String -> String -> [String]
 split sep = map unpack . splitOn (pack sep) . pack
 
@@ -27,7 +31,7 @@ triplet :: String -> [Int]
 triplet = map read . split ","
 
 orientations :: [Orientation]
-orientations = nub [zip d p | p <- axesPermutations, d <- directions]
+orientations = [zip d p | p <- axesPermutations, d <- directions]
     where axesPermutations = permutations [0,1,2]
           directions = replicateM 3 [1,-1]
 
@@ -95,10 +99,11 @@ solved (_, []) = True
 solved _ = False
 
 main = do
-    scanners <- map (map triplet . tail . lines) . split "\n\n" <$> readFile "day19_test.txt"
+    scanners <- map (map triplet . tail . lines) . split "\n\n" <$> readFile "day19.txt"
     let (solution,_) = last $ takeUntil solved $ iterate (solveStep scanners) (initial scanners, [(x,y) | x <- [0..length scanners-1], y <- [0..length scanners-1], x/=y])
         beacons = nub $ concatMap fst $ M.elems solution
-    print $ M.keys solution
-    print $ map snd $ M.elems solution
+        positions = map snd $ M.elems solution
+    -- part1
     print $ length beacons
-    -- putStrLn $ unlines $ map show $ sort beacons
+    -- part2
+    print $ maximum $ map (uncurry mdist) (allPairs positions)
