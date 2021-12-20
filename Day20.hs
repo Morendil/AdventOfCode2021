@@ -30,7 +30,7 @@ display grid = [ [ fromMaybe '.' $ M.lookup (x,y) grid | x <- [xMin-3..xMax+3]] 
 
 
 enhance :: String -> String -> Maybe Char
-enhance algo window = if algo !! value == '.' then Nothing else Just '#'
+enhance algo window = if algo !! value == '#' then Just '#' else Nothing
     where value = toDecimal $ map translate window
           translate '#' = 1
           translate '.' = 0
@@ -41,20 +41,36 @@ toDecimal bits = sum $ zipWith (\a b -> a * (2 ^ b)) (reverse bits) [0..]
 
 step :: String -> Image -> Image
 step algo grid = foldr ($) M.empty alterations
-  where alterations = [M.alter (const $ enhance algo (window (x,y))) (x,y) | x <- [xMin-2..xMax+2], y <- [yMin-2..yMax+2]]
+  where alterations = [M.alter (const $ enhance algo (window (x,y))) (x,y) | x <- [xMin-6..xMax+6], y <- [yMin-6..yMax+6]]
         window pt = map ((\cell -> M.findWithDefault '.' cell grid) . add pt) neighbours
-        coords = M.keys grid
-        xs = map fst coords
-        ys = map snd coords
-        xMin = minimum xs
-        xMax = maximum xs
-        yMin = minimum ys
-        yMax = maximum ys
+        ((xMin,xMax),(yMin,yMax)) = bounds grid
+
+bounds :: Image -> ((Int,Int),(Int,Int))
+bounds grid = ((xMin,xMax),(yMin,yMax))
+    where coords = M.keys grid
+          xs = map fst coords
+          ys = map snd coords
+          xMin = minimum xs
+          xMax = maximum xs
+          yMin = minimum ys
+          yMax = maximum ys
+
+cleanup :: ((Int,Int),(Int,Int)) -> Image -> Image
+cleanup ((xMin,xMax),(yMin,yMax)) = M.filterWithKey inBounds
+    where inBounds (x,y) a = x > xMin-6 && x < xMax+6 && y > yMin-6 && y < yMax+6
+
+converge :: Eq a => (a -> a) -> a -> a
+converge = until =<< ((==) =<<)
 
 main = do
-    [kernel, gridLines] <- split "\n\n" <$> readFile "day20_test.txt"
+    [kernel, gridLines] <- split "\n\n" <$> readFile "day20.txt"
     let grid = makeImage $ lines gridLines
-        twice = step kernel $ step kernel grid
+        twice grid = cleanup (bounds grid) $ step kernel $ step kernel grid
     -- part 1
-    print $ length $ M.elems twice
-    putStrLn $ unlines $ display twice
+    let two = twice grid
+    print $ length $ M.elems two
+    putStrLn $ unlines $ display two
+    -- part 2
+    let final = last $ take 26 $ iterate twice grid
+    print $ length $ M.elems final
+    putStrLn $ unlines $ display final
