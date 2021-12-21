@@ -22,16 +22,19 @@ forkAll :: Int -> [Universe] -> [Universe]
 forkAll player = concatMap (forkEach player)
 
 forkEach :: Int -> Universe -> [Universe]
+forkEach player (weight, state) | isWon state = [(weight, state)]
 forkEach player universe = map (forkOne player universe) forks
 
 forkOne :: Int -> Universe -> Fork -> Universe
-forkOne player (weight, state) _ | isWon state = (weight, state)
 forkOne player (weight, state) (paths, rolls) = (weight * paths, state')
       where state' = which player update state
             update (pos, score) = let pos' = advance 10 rolls pos in (pos', score+pos')
 
 isWon :: State -> Bool
 isWon ((_,score1),(_,score2)) = score1 >= 21 || score2 >= 21
+
+winner1 :: State -> Bool
+winner1 ((_,score1),_) = score1 >= 21
 
 advance limit by current = ((current-1+by) `mod` limit)+1
 which player = if player == 1 then first else second
@@ -61,4 +64,5 @@ main = do
       -- 444356092776315 universes, while player 2 merely wins in 341960390180808
       let initial :: [Universe]
           initial = [(1,((4,0),(8,0)))]
-      print $ length initial
+          final = last $ takeUntil (all(isWon.snd).snd) $ iterate evolve (1,[(1,((4,0),(8,0)))])
+      print $ both (sum.map fst) $ partition (winner1.snd) $ snd final
