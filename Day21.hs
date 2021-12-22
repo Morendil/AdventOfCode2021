@@ -58,11 +58,11 @@ won :: Game -> Bool
 won Game {players=(p1,p2)} = any ((>=1000) . score) [p1,p2]
 
 main = do
-      let initial = Game {die=1, current=1, players=(Player{pos=4,score=0},Player{pos=8,score=0}),rolls=0}
+      let initial = Game {die=1, current=1, players=(Player{pos=4,score=0},Player{pos=10,score=0}),rolls=0}
       let Game {rolls=rolls, players=(p1,p2)} = last $ takeUntil won $ iterate step initial
       print $ minimum (map score [p1,p2]) * rolls
       -- 444356092776315 universes, while player 2 merely wins in 341960390180808
       let initial :: [Universe]
-          initial = [(1,((4,0),(8,0)))]
-          final = last $ takeUntil (all(isWon.snd).snd) $ iterate evolve (1,[(1,((4,0),(8,0)))])
+          initial = [(1,((4,0),(10,0)))]
+          final = last $ takeUntil (all(isWon.snd).snd) $ iterate evolve (1, initial)
       print $ both (sum.map fst) $ partition (winner1.snd) $ snd final
